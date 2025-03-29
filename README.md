@@ -26,7 +26,7 @@ To install the latest version, you may use the provided “rockspec”:
 luarocks install grail
 ```
 
-The module depends on the `penlight` library and from the `rough` library. The dependencies are installed automatically by luarocks, if not already present.
+The module depends on the `penlight` library and on the `rough` library. The dependencies are installed automatically by luarocks, if not already present.
 
 ## Usage
 
