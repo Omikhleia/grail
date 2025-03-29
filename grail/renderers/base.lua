@@ -3,6 +3,7 @@
 -- License: MIT
 -- 2022, 2023, 2025 Didier Willis
 --
+local GrailError = SU and SU.error or error
 local DefaultPainter = require("grail.painters.default")
 
 local PathRenderer = pl.class()
@@ -64,7 +65,7 @@ function PathRenderer:pieSector (x, y, radius, startAngle, arcAngle, ratio, opti
 end
 
 function PathRenderer.draw (_, _, _) -- self, drawable, clippable
-  SU.error("PathRenderer:draw() is abstract")
+  GrailError("PathRenderer:draw() is abstract")
 end
 
 -- Exports

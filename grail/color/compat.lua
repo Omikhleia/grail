@@ -3,6 +3,8 @@ local color
 if SILE then
   color = SILE.types.color
 else
+  local GrailError = SU and SU.error or error
+
   -- Minimal reimplementation of the SILE color class
   -- to be used in Grail when SILE is not available.
   -- We don't reimplement the named colors, only the RGB/CMYK/Gray internal representation.
@@ -29,7 +31,7 @@ else
   function color.parse (_, input)
     local r, g, b, c, m, y, k, l
     if not input or type(input) ~= "string" then
-      SU.error("Not a color specification string (" .. tostring(input) .. ")")
+      GrailError("Not a color specification string (" .. tostring(input) .. ")")
     end
     r, g, b = input:match("^#(%x%x)(%x%x)(%x%x)$")
     if r then
@@ -59,7 +61,7 @@ else
     if l then
       return { l = tonumber(l) / 255 }
     end
-    SU.error("Unparsable color " .. input)
+    GrailError("Unparsable color " .. input)
   end
 end
 

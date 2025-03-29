@@ -3,6 +3,7 @@
 -- License: MIT
 -- 2022, 2023, 2025 Didier Willis
 --
+local GrailError = SU and SU.error or error
 local RoughGenerator = require("rough-lua.rough.generator").RoughGenerator
 local PRNG = require("prng-prigarin")
 
@@ -39,23 +40,23 @@ function RoughPainter:arc (x, y , w , h, start, stop, closed, options)
 end
 
 function RoughPainter.rectangleClip ()
-  SU.error("Rectangle clipping not implemented in RoughPainter")
+  GrailError("Rectangle clipping not implemented in RoughPainter")
 end
 
 function RoughPainter.roundedRectangle ()
-  SU.error("Rounded rectangle not implemented in RoughPainter")
+  GrailError("Rounded rectangle not implemented in RoughPainter")
 end
 
 function RoughPainter.roundedRectangleClip ()
-  SU.error("Rounded rectangle clip not implemented in RoughPainter")
+  GrailError("Rounded rectangle clip not implemented in RoughPainter")
 end
 
 function RoughPainter.curlyBrace ()
-  SU.error("Curly brace not implemented in RoughPainter")
+  GrailError("Curly brace not implemented in RoughPainter")
 end
 
 function RoughPainter.pieSector ()
-  SU.error("Pie sector not implemented in RoughPainter")
+  GrailError("Pie sector not implemented in RoughPainter")
 end
 
 return RoughPainter

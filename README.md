@@ -8,13 +8,13 @@ Grail (A Graphics Intermediate Library) is a small Lua graphics library that let
 
 It is born from the author's need to draw such shapes in several advanced modules for the SILE typesetting system.
 
-**Early development**: 
-The code still has some dependencies on SILE, but they are planned to be removed in the future.
-The API is subject to change, and the library is not yet fully documented.
-
 ## Features
 
-TBD
+In a nutshell, Grail allows you to:
+
+- Draw lines, polygons and curves, and more...
+- Draw shapes with a "default" regular style or a "sketchy" hand-drawn style...
+- ... And generate PDF graphics instructions, for use in PDF authoring systems such as the SILE typesetting system.
 
 ## Installation
 

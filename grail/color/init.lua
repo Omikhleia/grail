@@ -3,6 +3,7 @@
 -- @copyright License: MIT (c) 2024, 2025 Omikhleia, Didier Willis
 --
 local base = require("grail.color.compat") -- To extend the SILE color class if available
+local GrailError = SU and SU.error or error
 local Color = pl.class(base)
 
 -- Converts an RGB (Red, Green, Blue) color to HSL (Hue, Saturation, Lightness)
@@ -94,7 +95,7 @@ function Color:toHsl ()
       b = self.l,
     })
   end
-  SU.error("Invalid color specification")
+  GrailError("Invalid color specification")
 end
 
 --- Static method to create a Color object from HSL values

@@ -3,6 +3,7 @@
 -- License: MIT
 -- 2022, 2023, 2025 Didier Willis
 --
+local GrailError = SU and SU.error or error
 
 -- HELPERS
 
@@ -37,7 +38,7 @@ local function makeColorHelper (color, stroke)
     colspec = _r(color.l)
     colop = stroke and "G" or "g"
   else
-    SU.error("Invalid color specification")
+    GrailError("Invalid color specification")
   end
   return colspec .. " " .. colop
 end
@@ -112,7 +113,7 @@ function PathRenderer:draw (drawable, clippable)
         "B"
       }, " ")
     else
-      SU.error("Unknown drawing type: " .. drawing.type)
+      GrailError("Unknown drawing type: " .. drawing.type)
     end
     if path then
       g[#g + 1] = path
