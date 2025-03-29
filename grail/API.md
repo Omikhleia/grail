@@ -47,7 +47,7 @@ The **PathRenderer** class implements generic drawing functions to create vector
 
 When instantiated without any painter, it uses the DefaultPainter class
 
-You can instantiate and pass your own DefaultPainter or RoughPainter class to the PathRenderer constructor.
+You can instantiate and pass your own DefaultPainter or RoughPainter instance to the PathRenderer constructor.
 
 Example:
 
@@ -132,7 +132,7 @@ The radius corresponds to the outer circle, and the inner circle radius is defin
 
 The pie sector starts at a given angle and has a given arc angle size.
 
-For interesting examples using pie sectors, you may want too look at [**piechart.sile**](https://github.com/Omikhleia/piecharts.sile), a pie chart module for the SILE typesetting system.
+For interesting examples using pie sectors, you may want to look at [**piechart.sile**](https://github.com/Omikhleia/piecharts.sile), a pie chart module for the SILE typesetting system.
 
 ## Drawing options
 
@@ -260,7 +260,7 @@ The color parameter can be:
 
 ### Methods
 
-#### `toHSL()`
+#### `toHsl()`
 
 Converts the color to HSL (Hue, Saturation, Lightness) values.
 
@@ -268,7 +268,7 @@ Converts the color to HSL (Hue, Saturation, Lightness) values.
 local h, s, l = col:toHSL()
 ```
 
-#### (Static) `fromHSL(h, s, l)`
+#### (Static) `fromHsl(h, s, l)`
 
 Creates a new color instance from HSL values.
 
