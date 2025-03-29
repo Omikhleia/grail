@@ -35,7 +35,7 @@ With the `DefaultPainter`:
 ```lua
 pl = require("pl.import_into")() -- needed as global
 
-local PathRenderer = require("grail.renderer")
+local PathRenderer = require("grail.renderers.pdf")
 local Color = require("grail.color")
 
 local graphics = PathRenderer()
@@ -60,6 +60,8 @@ local drawing2 = rgraphics:circle(0, 0, 100, {
 ```
 
 In both cases, the returned drawing is a string that contains the PDF graphics instructions to draw the shape.
+
+For more details, see [API documentation](./grail/API.md).
 
 ## Historical notes
 

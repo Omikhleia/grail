@@ -1,6 +1,6 @@
 pl = require("pl.import_into")() -- needed as global
 
-local PathRenderer = require("grail.renderer")
+local PathRenderer = require("grail.renderers.pdf")
 local Color = require("grail.color")
 
 local graphics = PathRenderer()
@@ -9,7 +9,8 @@ local drawing1 = graphics:circle(0, 0, 100, {
   stroke = "none",
 })
 
--- print(drawing1)
+print("--- Drawing 1 ---")
+print(drawing1)
 
 local RoughPainter = require("grail.painters.rough")
 local rgraphics = PathRenderer(RoughPainter())
@@ -20,4 +21,5 @@ local drawing2 = rgraphics:circle(0, 0, 100, {
   strokeWidth = 0.4
 })
 
--- print(drawing2)
+print("--- Drawing 2 ---")
+print(drawing2)

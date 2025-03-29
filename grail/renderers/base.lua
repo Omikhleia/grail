@@ -1,5 +1,5 @@
 --
--- Base path renderer class for Grail
+-- Base path renderer class (API) for Grail, A Graphics Intermediate Library/
 -- License: MIT
 -- 2022, 2023, 2025 Didier Willis
 --
@@ -26,8 +26,8 @@ function PathRenderer:ellipse (x, y , w , h, options)
   return self:draw(drawable)
 end
 
-function PathRenderer:circle (x, y , w , h, options)
-  local drawable = self.painter:circle(x, y, w, h, options)
+function PathRenderer:circle (x, y , diameter, options)
+  local drawable = self.painter:circle(x, y, diameter, options)
   return self:draw(drawable)
 end
 
