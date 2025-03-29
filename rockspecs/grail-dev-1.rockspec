@@ -15,7 +15,7 @@ description = {
 dependencies = {
   "lua >= 5.1",
   "penlight",
-  "rough-lua",
+  "rough",
 }
 build = {
   type = "builtin",
@@ -29,7 +29,7 @@ build = {
 
     ["grail.painters.default"]                         = "grail/painters/default.lua",
     ["grail.painters.rough"]                           = "grail/painters/rough.lua",
-    
+
     ["grail.shapes.arc"]                               = "grail/shapes/arc.lua",
   }
 }
