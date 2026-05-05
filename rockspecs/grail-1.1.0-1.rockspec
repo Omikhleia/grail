@@ -1,8 +1,9 @@
 rockspec_format = "3.0"
 package = "grail"
-version = "dev-1"
+version = "1.1.0-1"
 source = {
   url = "git+https://github.com/Omikhleia/grail.git",
+  tag = "v1.1.0",
 }
 description = {
   summary = "A Graphics Intermediate Library",
@@ -14,7 +15,7 @@ description = {
 }
 dependencies = {
   "lua >= 5.1",
-  "penlight",
+  "penlight >= 1.14.0",
   "rough",
 }
 build = {

@@ -45,7 +45,7 @@ The painter instance is not supposed to be used directly, but rather through a *
 
 The **PathRenderer** class implements generic drawing functions to create vector graphics.
 
-When instantiated without any painter, it uses the DefaultPainter class
+When instantiated without any painter, it uses the DefaultPainter class, with default options.
 
 You can instantiate and pass your own DefaultPainter or RoughPainter instance to the PathRenderer constructor.
 
@@ -54,8 +54,37 @@ Example:
 ```lua
 local RoughPainter = require("grail.painters.rough")
 local PathRenderer = require("grail.renderers.pdf")
-local graphics = PathRenderer(RoughPainter())
+local renderer = PathRenderer(RoughPainter())
 ```
+
+The renderer provides methods to draw lines, rectangles, circles, ellipses, arcs, and more complex shapes.
+All drawing methods return two items:
+ - a drawing path, as a string of PDF graphics commands,
+ - if gradients are used (see [Colors](#colors)), a list of used gradient definitions.
+
+the latter is a list of tables with the following structure:
+
+```lua
+{
+  name = "viridis1", -- the instance name of the gradient used in the drawing path
+  angle = 0, -- the angle of the gradient, in degrees
+  gradient = {
+    name = "viridis", -- the original name of the gradient (e.g. "viridis", "inferno", etc.)
+    stops = { -- the color stops of the gradient
+      Color("#440154")
+      ...
+      Color("#fdea45")
+    }
+  }
+}
+```
+
+The responsibility of Grail stops at this point, and it's up to the PDF generation library to use these returned items as appropriate.
+
+In brief, usually, the drawing path is enclosed between `q` and `Q` operators in a PDF content stream
+A `cm` operator is also frequently used to set a transformation matrix for the drawing, so that the coordinates of the drawing path are transformed to the right position on the target page.
+The gradient definitions, if any, must be included in the target page's `/Resources` dictionary.
+Interested users may want to look at the **resilient.gradients** package in [**resilient.sile**](https://github.com/Omikhleia/resilient.sile), a module for the SILE typesetting system.
 
 ### Constructor
 
@@ -236,14 +265,12 @@ The seed for the PRNG (Pseudo Random Number Generator) used to randomize the dra
 
 ## Colors
 
-The Grail library provides a simple naive **Color** class to represent and manipulate colors.
+The Grail library provides a **Color** class to represent and manipulate colors or gradients.
 
 ```lua
 local Color = require("grail.color")
 local col = Color("#4cb252") -- nice greenish color
 ```
-
-_Note to SILE users:_ when used from SILE, Grail's Color class derives from the `SILE.types.color` class, and thus has all the methods and features of that class.
 
 ### Constructor
 
@@ -253,10 +280,21 @@ Creates a new color instance.
 
 The color parameter can be:
  - a string in the form of a hex color code (e.g. `#4cb252`),
+ - a string in the form of a known named color,
+ - a string in the form of a known named gradient, optionally followed by an angle in degrees (e.g. `viridis 90`),
  - a table with the red, green, and blue components of the color in the 0-1 range (e.g. `{r=0.3, g=0.7, b=0.5}`),
  - a table with the cyan, magenta, yellow, and black components of the color in the 0-1 range (e.g. `{c=0.3, m=0.7, y=0.5, k=0}`),
- - a table with a single (grayscale) value in the 0-1 range (e.g. `{l=0.5}`)
- - (_When used from SILE_) other formats supported by the `SILE.types.color` class, including named colors.
+ - a table with a single (grayscale) value in the 0-1 range (e.g. `{l=0.5}`).
+
+Named colors provided out of the box include all the named colors defined in the CSS Color Module Level 4 specification, including the "rebeccapurple" color added in 2014; and some custom color names defined by the library author, such as "anthracite".
+
+Named gradients provided out of the box include:
+ - some "usual" gradients ("viridis", "cividis", "inferno", "magma", "plasma", "turbo", "rocket", "flare", "crest", "mako", "vlag"),
+ - this author's own gradients ("omissible", "metallic"),
+ - the plural form of a named color (e.g. "goldenrods", "steelblues", "orangereds", "forestgreens" etc.) which are 2-stop gradients that go from a lighter to a darker shade of the corresponding color -- these are poor man's gradients, but they can be useful to quickly add some color variation, although your mileage may vary depending on the color.
+
+There's an API for registering custom gradients, but it's not documented yet and not considered stable.
+(Currently, the library only supports linear-interpolated gradients, as set of evenly spaced color stops.)
 
 ### Methods
 
@@ -265,13 +303,15 @@ The color parameter can be:
 Converts the color to HSL (Hue, Saturation, Lightness) values.
 
 ```lua
-local h, s, l = col:toHSL()
+local h, s, l = col:toHsl()
 ```
+
+Note that gradients are not convertible to HSL and an error will be raised.
 
 #### (Static) `fromHsl(h, s, l)`
 
 Creates a new color instance from HSL values.
 
 ```lua
-local col = Color.fromHSL(h, s, l)
+local col = Color.fromHsl(h, s, l)
 ```

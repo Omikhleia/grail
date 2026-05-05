@@ -1,8 +1,9 @@
+--- Rough painter class for Grail.
 --
--- Some classes to build PDF graphics drawings (path strings)
--- License: MIT
--- 2022, 2023, 2025 Didier Willis
---
+-- @license MIT
+-- @copyright (c) 2022, 2023, 2025 Didier Willis
+-- @module grail.painters.rough
+
 local GrailError = SU and SU.error or error
 local RoughGenerator = require("rough-lua.rough.generator").RoughGenerator
 local PRNG = require("prng-prigarin")

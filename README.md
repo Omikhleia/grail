@@ -38,8 +38,8 @@ pl = require("pl.import_into")() -- needed as global
 local PathRenderer = require("grail.renderers.pdf")
 local Color = require("grail.color")
 
-local graphics = PathRenderer()
-local drawing1 = graphics:circle(0, 0, 100, {
+local renderer1 = PathRenderer()
+local drawing1, _ = renderer1:circle(0, 0, 100, {
   fill = Color("#b2524c"),
   stroke = "none",
 })
@@ -48,10 +48,14 @@ local drawing1 = graphics:circle(0, 0, 100, {
 With the `RoughPainter` (for sketchy "hand-drawn" style drawings):
 
 ```lua
-...
+pl = require("pl.import_into")() -- needed as global
+
+local PathRenderer = require("grail.renderers.pdf")
+local Color = require("grail.color")
+
 local RoughPainter = require("grail.painters.rough")
-local rgraphics = PathRenderer(RoughPainter())
-local drawing2 = rgraphics:circle(0, 0, 100, {
+local renderer2 = PathRenderer(RoughPainter())
+local drawing2, _ = renderer2:circle(0, 0, 100, {
   fill = Color("#b2524c"),
   fillStyle = "cross-hatch",
   stroke = Color("#000000"),
@@ -60,6 +64,7 @@ local drawing2 = rgraphics:circle(0, 0, 100, {
 ```
 
 In both cases, the returned drawing is a string that contains the PDF graphics instructions to draw the shape.
+If gradients are used (for fill and/or stroke), a list of gradient definitions is also returned, for the caller to generate the corresponding PDF resources.
 
 For more details, see [API documentation](./grail/API.md).
 
@@ -71,4 +76,4 @@ Hence, most of the code was already used in production, and was generalized to b
 
 ## License
 
-The code and samples in this repository are released under the MIT License, (c) 2025 Omikhleia, Didier Willis.
+The code and samples in this repository are released under the MIT License, (c) 2025-2026 Omikhleia, Didier Willis.

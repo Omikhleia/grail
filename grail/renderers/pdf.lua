@@ -1,9 +1,12 @@
+--- PDF Path renderer class for Grail.
 --
--- Renderer class to build PDF graphics drawings (path strings)
--- License: MIT
--- 2022, 2023, 2025 Didier Willis
---
+-- @license MIT
+-- @copyright (c) 2022, 2023, 2026 Didier Willis
+-- @module grail.renderers.pdf
+
 local GrailError = SU and SU.error or error
+local Grads = require("grail.gradient")
+local referenceGradient = Grads.referenceGradient
 
 -- HELPERS
 
@@ -28,6 +31,7 @@ local function makeColorHelper (color, stroke)
   end
   local colspec
   local colop
+  local usedgrad
   if color.r then -- RGB
     colspec = table.concat({ _r(color.r), _r(color.g), _r(color.b) }, " ")
     colop = stroke and "RG" or "rg"
@@ -37,10 +41,14 @@ local function makeColorHelper (color, stroke)
   elseif color.l then -- Grayscale
     colspec = _r(color.l)
     colop = stroke and "G" or "g"
+  elseif color.G then -- Named gradient
+    usedgrad = referenceGradient(color.G, color.angle)
+    colspec = "/Pattern " .. (stroke and "CS" or "cs") .. " /" .. usedgrad.name
+    colop   = stroke and "SCN" or "scn"
   else
     GrailError("Invalid color specification")
   end
-  return colspec .. " " .. colop
+  return colspec .. " " .. colop, usedgrad
 end
 
 local function opsToPath (drawing, _)  -- drawing, precision
@@ -75,40 +83,47 @@ function PathRenderer:draw (drawable, clippable)
   local o = drawable.options
   local precision = drawable.options.fixedDecimalPlaceDigits
   local g = {}
+  local usedGradients = {}
   for _, drawing in ipairs(sets) do
+    local strokeColor, fillColor, strokeGrad, fillGrad
     local path = opsToPath(drawing, precision)
     if o.rounded == true then
       path = path .. " 1 J 1 j"
     end
     -- path = stroke only
     if drawing.type == "path" then
+      strokeColor, strokeGrad = makeColorHelper(o.stroke, true)
       path = table.concat({
           path,
-          makeColorHelper(o.stroke, true),
+          strokeColor,
           _r(o.strokeWidth), "w",
           "S"
       }, " ")
     -- fillPath = fill only
     elseif drawing.type == "fillPath" then
+      fillColor, fillGrad = makeColorHelper(o.fill, false)
       path = table.concat({
         path,
-        makeColorHelper(o.fill, false),
+        fillColor,
         "f"
       }, " ")
-    -- fillSketch = stroke only
+    -- fillSketch = stroke only, using fill color
     elseif drawing.type == "fillSketch" then
+      strokeColor, strokeGrad = makeColorHelper(o.fill, true)
       path = table.concat({
         path,
-        makeColorHelper(o.fill, true),
+        strokeColor,
         _r(o.strokeWidth), "w",
         "S"
       }, " ")
     -- shape = fill and stroke in one operation
     elseif drawing.type == "shape" then
+      strokeColor, strokeGrad = makeColorHelper(o.stroke, true)
+      fillColor, fillGrad = makeColorHelper(o.fill, false)
       path = table.concat({
         path,
-        makeColorHelper(o.stroke, true),
-        makeColorHelper(o.fill, false),
+        strokeColor,
+        fillColor,
         _r(o.strokeWidth), "w",
         "B"
       }, " ")
@@ -117,6 +132,12 @@ function PathRenderer:draw (drawable, clippable)
     end
     if path then
       g[#g + 1] = path
+    end
+    if strokeGrad then
+      usedGradients[#usedGradients + 1] = strokeGrad
+    end
+    if fillGrad then
+      usedGradients[#usedGradients + 1] = fillGrad
     end
   end
   local path = table.concat(g, " ")
@@ -131,7 +152,7 @@ function PathRenderer:draw (drawable, clippable)
        "Q"
      }, " ")
   end
-  return path
+  return path, usedGradients
 end
 
 return PathRenderer
