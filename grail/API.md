@@ -290,7 +290,8 @@ Named colors provided out of the box include all the named colors defined in the
 
 Named gradients provided out of the box include:
  - some "usual" gradients ("viridis", "cividis", "inferno", "magma", "plasma", "turbo", "rocket", "flare", "crest", "mako", "vlag"),
- - this author's own gradients ("omissible", "metallic"),
+ - this author's own gradient family "omissible", "omissiblesilver", "omissiblegold", "omissiblecopper", "omissiblebrass", "omissiblebronze", "omissibleruby", "omissibleemerald", "omissiblesapphire",
+ - this author's own pseudo-metallic gradients "metallicsteel", "metallicsilver", "metallicgold", "metallicopper", "metallicbrass", "metallicbronze",
  - the plural form of a named color (e.g. "goldenrods", "steelblues", "orangereds", "forestgreens" etc.) which are 2-stop gradients that go from a lighter to a darker shade of the corresponding color -- these are poor man's gradients, but they can be useful to quickly add some color variation, although your mileage may vary depending on the color.
 
 There's an API for registering custom gradients, but it's not documented yet and not considered stable.

@@ -1,17 +1,12 @@
---- Table of Named gradients.
---
--- Each entry in the table is a lambda function so that the (sometimes long)
--- list of color stops is only processed when needed.
---
--- The license does not apply to the names and color values, which should be
--- considered as CC0 (public domain) data.
+--- Named gradients.
 --
 -- @license MIT
--- @copyright (c) 2026 Didier Willis
+-- @copyright (c) 2026 idier Willis
 -- @module grail.gradient.presets
 
+-- The following table is a collection of named gradients from various sources.
+-- Each entry is a lambda function so that the (sometimes long) list of color stops is only processed when needed.
 local GRADIENTS = {
-  -- Collection of named gradients from various sources.
   turbo = function ()
     return {
       "#23171b", "#271a28", "#2b1c33", "#2f1e3f", "#32204a", "#362354",
@@ -371,23 +366,156 @@ local GRADIENTS = {
       "#2c3373", "#2c3272", "#2c3172", "#2c3172"
     }
     end,
-  -- Non-standard (custom/personal) gradients.
-  --  - omissible is a set of grayish gradients with a bit of blue for a more "industrial" look in UI elements.
-  --  - metallic is a set of gradients with a more "metallic" look, with grays and some cyanish colors for highlights.
+  -- My own personal gradients crafted manually: omissible is grayish with a bit of blue.
+  -- Variations on the same theme with different color casts: gold, copper, brass, bronze, ruby, emerald, sapphire
+  -- (without claim to physical accuracy, just based on what "feels" right to me after trial and error.)
   omissible = function ()
     return {
-      "#4a545f", "#5b6673", "#8f9aa6", "#b8c2cb", "#e6e9ed",
-      "#ffffff", "#cfd6dd", "#9aa4b2"
+      "#49515b", "#5b6673", "#8e99a5", "#bcc5cd", "#e7ebef",
+      "#ffffff",
+      "#d2d9e0", "#95a3b3"
     }
     end,
-  metallic = function ()
+  omissiblesilver = function ()
     return {
-      "#36353b",
-      "#555b5f", "#748183", "#92a7a6", "#afccc7", "#c4e7e1", "#e6e9ed",
-      "#cfd6dd", "#b8c2cb", "#8f9aa6", "#5b6673", "#4a545f"
+      "#39424c", "#4a5563", "#788594", "#a9b5c2", "#dde5ec",
+      "#ffffff",
+      "#c7d1da", "#8ea0b3"
     }
     end,
+  omissiblegold = function ()
+    return {
+      "#544114", "#6d5318", "#b1842f", "#dcb04d", "#f3d98f",
+      "#fffaf2",
+      "#ebc86a", "#d19a35"
+    }
+    end,
+  omissiblecopper = function ()
+    return {
+      "#4b382d", "#60463a", "#956b56", "#bf8973", "#e7c2b2",
+      "#fffaf7",
+      "#d7b09e", "#a57b63"
+    }
+    end,
+  omissiblebrass = function ()
+    return {
+      "#473d24", "#5a4d2d", "#8d7440", "#b5964f", "#dbc274",
+      "#fff8e8",
+      "#ccb164", "#9d7f35"
+    }
+    end,
+  omissiblebronze = function ()
+    return {
+      "#4a3728", "#604434", "#94684b", "#bd855d", "#dfa87b",
+      "#fff5ec",
+      "#cf9970", "#9f6b42"
+    }
+  end,
+  omissibleruby = function ()
+    return {
+      "#4a262c", "#60333b", "#95505f", "#bf7183", "#e6bcc6",
+      "#fff8fa",
+      "#d9a5b2", "#a85c70"
+    }
+    end,
+  omissibleemerald = function ()
+    return {
+      "#243c33", "#2f4d42", "#4f7c69", "#73a690", "#bfe2d3",
+      "#f3fff9",
+      "#9fd0bb", "#4f9b7d"
+    }
+    end,
+  omissiblesapphire = function ()
+    return {
+      "#283449",  "#34445d", "#536f95", "#7693bf", "#c4d5ea",
+      "#f6fbff",
+      "#aac0de", "#5d82b5"
+    }
+    end,
+  -- metallic = function () -- Not that good, replaced by a more systematic approach below
+  --   return {
+  --     "#4a545f", "#5b6673", "#8f9aa6", "#b8c2cb", "#e6e9ed",
+  --     "#e6e9ed", "#c4e7e1", "#afccc7", "#92a7a6", "#748183", "#555b5f",
+  --     "#36353b"
+  --   }
+  -- end,
 }
+
+-- This is totally empirical too.
+-- No claim either to any physical accuracy or appropriateness.
+-- Just based on what "feels" right to me after trial and error.
+local METALS = {
+  steel = {
+    base = {52, 53, 58},
+    midpoint = {226, 231, 236},
+    chroma = {180, 190, 220}
+  },
+  silver = {
+    base = {58, 59, 64},
+    midpoint = {239, 241, 245},
+    chroma = {170, 176, 186}
+  },
+  copper = {
+    base = {62, 40, 30},
+    midpoint = {236, 186, 143},
+    chroma = {181, 118, 84}
+  },
+  brass = {
+    base = {72, 60, 30},
+    midpoint = {241, 220, 150},
+    chroma = {170, 150, 88}
+  },
+  bronze = {
+    base = {80, 58, 39},
+    midpoint = {210, 154, 102},
+    chroma = {138, 120, 82}
+  },
+  gold = {
+    base = {86, 57, 18},
+    midpoint = {255, 233, 162},
+    chroma = {221, 194, 112}
+  }
+}
+local buildMetal = function(base, midpoint, chroma)
+  local function lerp(a, b, t)
+    return {
+      a[1] + (b[1] - a[1]) * t,
+      a[2] + (b[2] - a[2]) * t,
+      a[3] + (b[3] - a[3]) * t
+    }
+  end
+
+  local out = {}
+  local start = lerp({0, 0, 0}, base, 1.25)
+  out[1] = start
+  -- Progressively blend from base to midpoint
+  for i = 2, 6 do
+    local t = (i - 1) / 5
+    local c = lerp(base, midpoint, t)
+      out[i] = c
+  end
+   -- a bright highlight at the midpoint
+  out[7] = lerp({255, 255, 255}, midpoint, 0.9)
+    out[8] = midpoint
+  -- Then blend from midpoint to a chroma-influenced version of the base color for highlights and atmospheric effects
+  for i = 9, 14 do
+    local t = (i - 8) / 6
+    local chromaT = math.exp(-3 * t) -- exponential decay for chroma influencse
+    local chromamix = lerp(chroma, midpoint, chromaT)
+    local c = lerp(chromamix, base, t)
+    out[i] = c
+  end
+
+  return out
+end
+
+for name, metal in pairs(METALS) do
+  GRADIENTS["metallic" .. name] = function ()
+    local m = buildMetal(metal.base, metal.midpoint, metal.chroma)
+    local cols = pl.tablex.map(function(c) return string.format("#%02x%02x%02x", c[1], c[2], c[3]) end, m)
+    return cols
+  end
+end
 
 -- For each preset color, we also create a two-stop ggradient (e.g. "red" -> "reds")
 -- starting with a darkened version of the color and ending with a lightened version of the color.
