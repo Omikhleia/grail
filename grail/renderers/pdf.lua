@@ -1,9 +1,12 @@
+--- PDF Path renderer class for Grail.
 --
--- Renderer class to build PDF graphics drawings (path strings)
--- License: MIT
--- 2022, 2023, 2025 Didier Willis
---
+-- @license MIT
+-- @copyright (c) 2022, 2023, 2026 Didier Willis
+-- @module grail.renderers.pdf
+
 local GrailError = SU and SU.error or error
+local Grads = require("grail.gradient")
+local referenceGradient = Grads.referenceGradient
 
 -- HELPERS
 
@@ -17,17 +20,19 @@ local function _r (number)
   return math.floor(number) == number and tostring(math.floor(number)) or string.format("%.5f", number)
 end
 
---- Builds a PDF graphics color (stroke or fill) from a SILE parsed color.
+--- Builds a PDF graphics color (stroke or fill) from a color (or gradient).
 --
--- @tparam  table|nil  color     SILE color object
--- @tparam  boolean    stroke    Stroke or fill
+-- @tparam  table|nil  Color     Parsed color object
+-- @tparam  boolean    stroke    Stroke (true) or fill (false)
+-- @tparam  pl.Map     cache     Cache for used gradients in a given drawable
 -- @treturn string               PDF graphics color
-local function makeColorHelper (color, stroke)
+local function makeColorHelper (color, stroke, cache)
   if not color then
     return "" -- let current color be used
   end
   local colspec
   local colop
+  local usedgrad
   if color.r then -- RGB
     colspec = table.concat({ _r(color.r), _r(color.g), _r(color.b) }, " ")
     colop = stroke and "RG" or "rg"
@@ -37,10 +42,20 @@ local function makeColorHelper (color, stroke)
   elseif color.l then -- Grayscale
     colspec = _r(color.l)
     colop = stroke and "G" or "g"
+  elseif color.G then -- Named gradient
+    local cached = cache:get(color.G)
+    if cached then
+      usedgrad = cached
+    else
+      usedgrad = referenceGradient(color.G, color.angle)
+      cache:set(color.G, usedgrad)
+    end
+    colspec = "/Pattern " .. (stroke and "CS" or "cs") .. " /" .. usedgrad.name
+    colop   = stroke and "SCN" or "scn"
   else
     GrailError("Invalid color specification")
   end
-  return colspec .. " " .. colop
+  return colspec .. " " .. colop, usedgrad
 end
 
 local function opsToPath (drawing, _)  -- drawing, precision
@@ -75,40 +90,50 @@ function PathRenderer:draw (drawable, clippable)
   local o = drawable.options
   local precision = drawable.options.fixedDecimalPlaceDigits
   local g = {}
+  -- In a given drawable, items may share gradients as they are in the same coordinate space.
+  -- Note: the order of gradiens does not matter but pl.OrderedMap() could be nice for easier debugging.
+  local cacheGradients = pl.Map()
+
   for _, drawing in ipairs(sets) do
+    local strokeColor, fillColor
     local path = opsToPath(drawing, precision)
     if o.rounded == true then
       path = path .. " 1 J 1 j"
     end
     -- path = stroke only
     if drawing.type == "path" then
+      strokeColor = makeColorHelper(o.stroke, true, cacheGradients)
       path = table.concat({
           path,
-          makeColorHelper(o.stroke, true),
+          strokeColor,
           _r(o.strokeWidth), "w",
           "S"
       }, " ")
     -- fillPath = fill only
     elseif drawing.type == "fillPath" then
+      fillColor = makeColorHelper(o.fill, false, cacheGradients)
       path = table.concat({
         path,
-        makeColorHelper(o.fill, false),
+        fillColor,
         "f"
       }, " ")
-    -- fillSketch = stroke only
+    -- fillSketch = stroke only, using fill color
     elseif drawing.type == "fillSketch" then
+      strokeColor = makeColorHelper(o.fill, true, cacheGradients)
       path = table.concat({
         path,
-        makeColorHelper(o.fill, true),
+        strokeColor,
         _r(o.strokeWidth), "w",
         "S"
       }, " ")
     -- shape = fill and stroke in one operation
     elseif drawing.type == "shape" then
+      strokeColor = makeColorHelper(o.stroke, true, cacheGradients)
+      fillColor = makeColorHelper(o.fill, false, cacheGradients)
       path = table.concat({
         path,
-        makeColorHelper(o.stroke, true),
-        makeColorHelper(o.fill, false),
+        strokeColor,
+        fillColor,
         _r(o.strokeWidth), "w",
         "B"
       }, " ")
@@ -131,7 +156,7 @@ function PathRenderer:draw (drawable, clippable)
        "Q"
      }, " ")
   end
-  return path
+  return path, cacheGradients:values()
 end
 
 return PathRenderer

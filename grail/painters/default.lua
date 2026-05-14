@@ -1,8 +1,9 @@
+--- Default painter class for Grail.
 --
--- Some classes to build PDF graphics drawings (path strings)
--- License: MIT
--- 2022, 2023, 2025 Didier Willis
---
+-- @license MIT
+-- @copyright (c) 2022, 2023, 2025 Didier Willis
+-- @module grail.painters.default
+
 local arcToBezierCurves = require("grail.shapes.arc")
 
 local DefaultPainter = pl.class()

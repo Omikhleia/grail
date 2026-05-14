@@ -1,18 +1,20 @@
 --- Approximate an ellipse arc with successive bezier curves.
+--
 -- Based on L. Maisonobe, "Drawing an elliptical arc using polylines,
--- quadratic orcubic Bezier curves", 2003, §3.4.1)
-
---- @module grail.shapes.arc
---- @copyright License: MIT (c) 2024; 2025 Omikhleia, Didier Willis
+-- quadratic orcubic Bezier curves", 2003, §3.4.1
+--
+-- @license MIT
+-- @copyright (c) 2024, 2025, Didier Willis
+-- @module grail.shapes.arc
 
 --- Compute the control points of a Bezier curve approximating an ellipse arc.
----@param x          number Position of the center of the ellipse on the x-axis
----@param y          number Position of the center of the ellipse on the y-axis
----@param a          number Semi-axis of the ellipse in the x-axis
----@param b          number Semi-axis of the ellipse in the y-axis
----@param startAngle number Start angle of the arc in radians
----@param arcAngle   number Angle of the arc in radians
----@return table     Bezier control points as a table of 8 numbers (start point, 2 control points, end point)
+-- @tparam number x Position of the center of the ellipse on the x-axis
+-- @tparam number y Position of the center of the ellipse on the y-axis
+-- @tparam number a Semi-axis of the ellipse in the x-axis
+-- @tparam number b Semi-axis of the ellipse in the y-axis
+-- @tparam number startAngle Start angle of the arc in radians
+-- @tparam number arcAngle Angle of the arc in radians
+-- @treturn table Bezier control points as a table of 8 numbers (start point, 2 control points, end point)
 local function _arcBezierCurve (x, y, a, b, startAngle, arcAngle)
   local cx = x
   local cy = y
@@ -59,13 +61,14 @@ end
 local maxAnglePerCurve = 15 * math.pi / 180
 
 --- Approximate an ellipse arc with successive bezier curves.
----@param x          number Position of the center of the ellipse on the x-axis
----@param y          number Position of the center of the ellipse on the y-axis
----@param a          number Semi-axis of the ellipse in the x-axis
----@param b          number Semi-axis of the ellipse in the y-axis
----@param startAngle number Start angle of the arc in radians
----@param arcAngle   number Angle of the arc in radians
----@return table     List of curves (initial 2-point position, then 3-point curves)
+-- @tparam number x Position of the center of the ellipse on the x-axis
+-- @tparam number y Position of the center of the ellipse on the y-axis
+-- @tparam number a Semi-axis of the ellipse in the x-axis
+-- @tparam number b Semi-axis of the ellipse in the y-axis
+-- @tparam number startAngle Start angle of the arc in radians
+-- @tparam number arcAngle Angle of the arc in radians
+-- @tparam boolean closed Whether to close the arc with a line to the center
+-- @treturn table List of curves (initial 2-point position, then 3-point curves)
 local function arcToBezierCurves (x, y, a, b, startAngle, arcAngle, closed)
   local n = math.ceil(math.abs(arcAngle / maxAnglePerCurve))
   local actualArcAngle = arcAngle / n

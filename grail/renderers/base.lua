@@ -1,8 +1,9 @@
+--- Base path renderer class for Grail.
 --
--- Base path renderer class (API) for Grail, A Graphics Intermediate Library/
--- License: MIT
--- 2022, 2023, 2025 Didier Willis
---
+-- @license MIT
+-- @copyright (c) 2022, 2023, 2025 Didier Willis
+-- @module grail.renderers.base
+
 local GrailError = SU and SU.error or error
 local DefaultPainter = require("grail.painters.default")
 
