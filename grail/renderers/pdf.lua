@@ -20,12 +20,13 @@ local function _r (number)
   return math.floor(number) == number and tostring(math.floor(number)) or string.format("%.5f", number)
 end
 
---- Builds a PDF graphics color (stroke or fill) from a SILE parsed color.
+--- Builds a PDF graphics color (stroke or fill) from a color (or gradient).
 --
--- @tparam  table|nil  color     SILE color object
--- @tparam  boolean    stroke    Stroke or fill
+-- @tparam  table|nil  Color     Parsed color object
+-- @tparam  boolean    stroke    Stroke (true) or fill (false)
+-- @tparam  pl.Map     cache     Cache for used gradients in a given drawable
 -- @treturn string               PDF graphics color
-local function makeColorHelper (color, stroke)
+local function makeColorHelper (color, stroke, cache)
   if not color then
     return "" -- let current color be used
   end
@@ -42,7 +43,13 @@ local function makeColorHelper (color, stroke)
     colspec = _r(color.l)
     colop = stroke and "G" or "g"
   elseif color.G then -- Named gradient
-    usedgrad = referenceGradient(color.G, color.angle)
+    local cached = cache:get(color.G)
+    if cached then
+      usedgrad = cached
+    else
+      usedgrad = referenceGradient(color.G, color.angle)
+      cache:set(color.G, usedgrad)
+    end
     colspec = "/Pattern " .. (stroke and "CS" or "cs") .. " /" .. usedgrad.name
     colop   = stroke and "SCN" or "scn"
   else
@@ -83,16 +90,19 @@ function PathRenderer:draw (drawable, clippable)
   local o = drawable.options
   local precision = drawable.options.fixedDecimalPlaceDigits
   local g = {}
-  local usedGradients = {}
+  -- In a given drawable, items may share gradients as they are in the same coordinate space.
+  -- Note: the order of gradiens does not matter but pl.OrderedMap() could be nice for easier debugging.
+  local cacheGradients = pl.Map()
+
   for _, drawing in ipairs(sets) do
-    local strokeColor, fillColor, strokeGrad, fillGrad
+    local strokeColor, fillColor
     local path = opsToPath(drawing, precision)
     if o.rounded == true then
       path = path .. " 1 J 1 j"
     end
     -- path = stroke only
     if drawing.type == "path" then
-      strokeColor, strokeGrad = makeColorHelper(o.stroke, true)
+      strokeColor = makeColorHelper(o.stroke, true, cacheGradients)
       path = table.concat({
           path,
           strokeColor,
@@ -101,7 +111,7 @@ function PathRenderer:draw (drawable, clippable)
       }, " ")
     -- fillPath = fill only
     elseif drawing.type == "fillPath" then
-      fillColor, fillGrad = makeColorHelper(o.fill, false)
+      fillColor = makeColorHelper(o.fill, false, cacheGradients)
       path = table.concat({
         path,
         fillColor,
@@ -109,7 +119,7 @@ function PathRenderer:draw (drawable, clippable)
       }, " ")
     -- fillSketch = stroke only, using fill color
     elseif drawing.type == "fillSketch" then
-      strokeColor, strokeGrad = makeColorHelper(o.fill, true)
+      strokeColor = makeColorHelper(o.fill, true, cacheGradients)
       path = table.concat({
         path,
         strokeColor,
@@ -118,8 +128,8 @@ function PathRenderer:draw (drawable, clippable)
       }, " ")
     -- shape = fill and stroke in one operation
     elseif drawing.type == "shape" then
-      strokeColor, strokeGrad = makeColorHelper(o.stroke, true)
-      fillColor, fillGrad = makeColorHelper(o.fill, false)
+      strokeColor = makeColorHelper(o.stroke, true, cacheGradients)
+      fillColor = makeColorHelper(o.fill, false, cacheGradients)
       path = table.concat({
         path,
         strokeColor,
@@ -132,12 +142,6 @@ function PathRenderer:draw (drawable, clippable)
     end
     if path then
       g[#g + 1] = path
-    end
-    if strokeGrad then
-      usedGradients[#usedGradients + 1] = strokeGrad
-    end
-    if fillGrad then
-      usedGradients[#usedGradients + 1] = fillGrad
     end
   end
   local path = table.concat(g, " ")
@@ -152,7 +156,7 @@ function PathRenderer:draw (drawable, clippable)
        "Q"
      }, " ")
   end
-  return path, usedGradients
+  return path, cacheGradients:values()
 end
 
 return PathRenderer
